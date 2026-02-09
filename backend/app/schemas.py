@@ -38,3 +38,10 @@ class AccountMovement(BaseModel):
 
 class PriceListSwitch(BaseModel):
     active_list: str = Field(description="card o cash")
+
+
+class StockMovement(BaseModel):
+    barcode: str
+    quantity: int = Field(gt=0)
+    kind: str = Field(description="purchase, adjustment_in, adjustment_out o sale")
+    note: str | None = None

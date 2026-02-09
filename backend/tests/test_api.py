@@ -64,3 +64,58 @@ def test_customer_account_movement() -> None:
     )
     assert payment.status_code == 200
     assert payment.json()['debt_balance'] == 15000
+
+
+def test_stock_movement_purchase_and_sale() -> None:
+    create = client.post(
+        '/products',
+        json={
+            'barcode': '7790000000001',
+            'description': 'Cadena 428',
+            'brand': 'DID',
+            'cost_price': 20000,
+            'cash_price': 35000,
+            'card_price': 36800,
+            'supplier': 'Repuestos Centro',
+            'stock': 0,
+        },
+    )
+    assert create.status_code == 200
+
+    purchase = client.post(
+        '/stock/movement',
+        json={'barcode': '7790000000001', 'quantity': 5, 'kind': 'purchase', 'note': 'ingreso'},
+    )
+    assert purchase.status_code == 200
+    assert purchase.json()['stock'] == 5
+
+    sale = client.post(
+        '/stock/movement',
+        json={'barcode': '7790000000001', 'quantity': 2, 'kind': 'sale', 'note': 'venta mostrador'},
+    )
+    assert sale.status_code == 200
+    assert sale.json()['stock'] == 3
+
+
+def test_stock_movement_insufficient_stock() -> None:
+    create = client.post(
+        '/products',
+        json={
+            'barcode': '7790000000002',
+            'description': 'Bujia',
+            'brand': 'NGK',
+            'cost_price': 7000,
+            'cash_price': 12000,
+            'card_price': 12600,
+            'supplier': 'Repuestos Centro',
+            'stock': 1,
+        },
+    )
+    assert create.status_code == 200
+
+    response = client.post(
+        '/stock/movement',
+        json={'barcode': '7790000000002', 'quantity': 3, 'kind': 'sale', 'note': 'venta'},
+    )
+    assert response.status_code == 400
+    assert response.json()['detail'] == 'Stock insuficiente'
