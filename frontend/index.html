@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avila Moto Repuesto | POS Front</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <div>
+          <h1>POS · Avila Moto Repuesto</h1>
+          <p>Vista inicial de mostrador con alternancia de lista de precios.</p>
+        </div>
+        <div class="status" id="api-status">Verificando API…</div>
+      </header>
+
+      <section class="toolbar">
+        <button id="toggle-price-list" type="button">Cambiar a contado</button>
+        <span id="active-list-label">Lista activa: tarjeta</span>
+        <button id="reload-products" type="button" class="secondary">Recargar productos</button>
+      </section>
+
+      <section class="panel">
+        <h2>Productos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Marca</th>
+              <th id="price-column-title">Precio tarjeta</th>
+              <th>Stock</th>
+            </tr>
+          </thead>
+          <tbody id="products-body">
+            <tr>
+              <td colspan="5" class="empty">Cargando productos…</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

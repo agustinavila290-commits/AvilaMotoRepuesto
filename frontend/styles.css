@@ -1,0 +1,107 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f6f7fb;
+  color: #222;
+}
+
+.container {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+p {
+  margin: 0.35rem 0 0;
+  color: #4f566b;
+}
+
+.status {
+  background: #e7ebff;
+  color: #2d3a87;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.toolbar {
+  margin-top: 1rem;
+  background: #fff;
+  border: 1px solid #e1e5f2;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  background: #1f3fef;
+  color: #fff;
+  padding: 0.55rem 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #5b647a;
+}
+
+#active-list-label {
+  font-weight: 600;
+  color: #2d2f3d;
+}
+
+.panel {
+  margin-top: 1rem;
+  background: #fff;
+  border: 1px solid #e1e5f2;
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #edf0f7;
+  text-align: left;
+  padding: 0.65rem 0.35rem;
+  font-size: 0.92rem;
+}
+
+th {
+  color: #4d5470;
+}
+
+.empty {
+  color: #7b8194;
+  text-align: center;
+}
