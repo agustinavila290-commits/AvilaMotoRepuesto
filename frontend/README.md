@@ -1,9 +1,12 @@
 # Frontend inicial (POS)
 
 Interfaz base para mostrador con foco en:
-- Visualizar productos.
-- Mostrar precio según lista activa (`card`/`cash`).
-- Cambiar lista de precios desde la UI.
+- Visualizar productos y alternar lista activa (`card`/`cash`).
+- Buscar por código de barras.
+- Buscar por nombre/palabra clave (soporta prefijo `%`, por ejemplo `%arb`).
+- Navegar por módulos: POS, Clientes, Productos y Configuración.
+- Agregar/modificar productos desde UI.
+- Configurar opciones de login/multiusuario (guardado local en navegador).
 
 ## Ejecutar
 Con backend en `http://127.0.0.1:8000`:

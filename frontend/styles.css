@@ -10,7 +10,7 @@ body {
 }
 
 .container {
-  max-width: 960px;
+  max-width: 1060px;
   margin: 2rem auto;
   padding: 0 1rem 2rem;
 }
@@ -38,6 +38,23 @@ p {
   border-radius: 999px;
   padding: 0.35rem 0.75rem;
   font-size: 0.85rem;
+}
+
+.top-nav {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: #e7ebff;
+  color: #24317f;
+}
+
+.nav-btn.active {
+  background: #1f3fef;
+  color: #fff;
 }
 
 .toolbar {
@@ -84,6 +101,11 @@ h2 {
   font-size: 1.05rem;
 }
 
+h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.98rem;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -104,4 +126,55 @@ th {
 .empty {
   color: #7b8194;
   text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.search-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+}
+
+.form-block {
+  border: 1px solid #edf0f7;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 0.6rem;
+}
+
+input {
+  border: 1px solid #d6dced;
+  border-radius: 8px;
+  padding: 0.55rem 0.6rem;
+  font: inherit;
+}
+
+label {
+  font-size: 0.9rem;
+  color: #48506a;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.muted {
+  color: #66708f;
+  font-size: 0.9rem;
 }
