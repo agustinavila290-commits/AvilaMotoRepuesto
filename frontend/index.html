@@ -57,11 +57,32 @@
               <th>Marca</th>
               <th id="price-column-title">Precio tarjeta</th>
               <th>Stock</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody id="products-body">
             <tr>
-              <td colspan="5" class="empty">Cargando productos…</td>
+              <td colspan="6" class="empty">Cargando productos…</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel module" data-module-panel="pos">
+        <h2>Listado de venta</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="sale-items-body">
+            <tr>
+              <td colspan="5" class="empty">Todavía no agregaste productos al listado.</td>
             </tr>
           </tbody>
         </table>
@@ -123,6 +144,23 @@
         <p id="settings-status" class="muted">Configuración no guardada aún.</p>
       </section>
     </main>
+
+    <aside class="checkout-dock" data-module-panel="pos">
+      <p class="checkout-label">Total final</p>
+      <p id="checkout-total" class="checkout-total">$ 0</p>
+      <button id="open-checkout" type="button">Cobrar</button>
+
+      <div id="checkout-menu" class="checkout-menu hidden">
+        <p class="checkout-subtitle">Elegí método de pago</p>
+        <button class="pay-option" data-pay-method="cash" type="button">Pagar en efectivo</button>
+        <button class="pay-option" data-pay-method="card" type="button">Pagar con tarjeta</button>
+
+        <div class="pay-client-row">
+          <input id="client-id-input" placeholder="ID cliente (cuenta corriente)" />
+          <button id="pay-to-client" class="secondary" type="button">Sumar a cliente</button>
+        </div>
+      </div>
+    </aside>
 
     <script src="./app.js" type="module"></script>
   </body>

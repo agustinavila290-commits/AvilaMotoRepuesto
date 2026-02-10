@@ -7,6 +7,7 @@ Interfaz base para mostrador con foco en:
 - Navegar por módulos: POS, Clientes, Productos y Configuración.
 - Agregar/modificar productos desde UI.
 - Configurar opciones de login/multiusuario (guardado local en navegador).
+- Armar listado de venta, ver total final en margen inferior derecho y abrir submenú de cobro (efectivo, tarjeta o sumar a cliente).
 
 ## Ejecutar
 Con backend en `http://127.0.0.1:8000`:
