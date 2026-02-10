@@ -1,3 +1,12 @@
+import os
+from pathlib import Path
+
+DB_PATH = Path('backend/tests/test_app.db')
+if DB_PATH.exists():
+    DB_PATH.unlink()
+os.environ['DATABASE_URL'] = f'sqlite:///{DB_PATH}'
+os.environ['INVOICE_STORAGE_DIR'] = 'backend/tests/invoices'
+
 from fastapi.testclient import TestClient
 
 from app.main import app
