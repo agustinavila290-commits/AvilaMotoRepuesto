@@ -1,13 +1,5 @@
 from datetime import datetime
-from pathlib import Path
-from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
-
-from app.db import ensure_invoice_dir, get_db
-from app.models import CustomerModel, InvoiceItemModel, InvoiceModel
-from app.schemas import ChargeRequest, ChargeResponse
 
 router = APIRouter(prefix="/billing", tags=["billing"])
 
