@@ -227,3 +227,23 @@ label {
   grid-template-columns: 1fr;
   gap: 0.45rem;
 }
+
+
+.checkout-info {
+  margin-top: 0.65rem;
+  line-height: 1.35;
+}
+
+.quote-screen {
+  max-width: 900px;
+}
+
+.quote-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.55rem;
+}
+
+.quote-actions a {
+  text-decoration: none;
+}

@@ -7,6 +7,7 @@ Base de API para arrancar el desarrollo del sistema local + e-commerce.
 - Precios (lista activa `card`/`cash` para POS).
 - Clientes con cuenta corriente (deuda y pagos).
 - Movimientos de stock auditables (compra, venta y ajustes).
+- Facturación de venta con simulación de flujo ARCA + descarga de PDF.
 
 ## Ejecutar
 ```bash

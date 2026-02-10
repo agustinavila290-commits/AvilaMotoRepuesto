@@ -119,3 +119,43 @@ def test_stock_movement_insufficient_stock() -> None:
     )
     assert response.status_code == 400
     assert response.json()['detail'] == 'Stock insuficiente'
+
+
+def test_charge_and_invoice_pdf() -> None:
+    product = client.post(
+        '/products',
+        json={
+            'barcode': '7790000000100',
+            'description': 'Disco de freno',
+            'brand': 'Braking',
+            'cost_price': 15000,
+            'cash_price': 25500,
+            'card_price': 26800,
+            'supplier': 'MotoPartes SA',
+            'stock': 3,
+        },
+    )
+    assert product.status_code == 200
+
+    charge = client.post(
+        '/billing/charge',
+        json={
+            'payment_method': 'cash',
+            'items': [
+                {
+                    'barcode': '7790000000100',
+                    'description': 'Disco de freno',
+                    'quantity': 1,
+                    'unit_price': 26800,
+                }
+            ],
+        },
+    )
+    assert charge.status_code == 200
+    data = charge.json()
+    assert data['arca_status'] == 'approved'
+    assert data['pdf_url'].startswith('/billing/invoices/')
+
+    pdf = client.get(data['pdf_url'])
+    assert pdf.status_code == 200
+    assert pdf.headers['content-type'].startswith('application/pdf')

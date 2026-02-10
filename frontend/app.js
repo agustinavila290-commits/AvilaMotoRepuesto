@@ -20,11 +20,11 @@ const loginRequiredInput = document.querySelector('#login-required');
 const settingsStatus = document.querySelector('#settings-status');
 const checkoutDock = document.querySelector('.checkout-dock');
 const checkoutTotal = document.querySelector('#checkout-total');
-const openCheckout = document.querySelector('#open-checkout');
-const checkoutMenu = document.querySelector('#checkout-menu');
 const payOptions = document.querySelectorAll('.pay-option');
 const clientIdInput = document.querySelector('#client-id-input');
 const payToClientButton = document.querySelector('#pay-to-client');
+const generateQuoteButton = document.querySelector('#generate-quote');
+const invoiceStatus = document.querySelector('#invoice-status');
 
 let activeList = 'card';
 let allProducts = [];
@@ -260,6 +260,46 @@ const clearSale = () => {
   renderSaleItems();
 };
 
+const chargeAndInvoice = async (paymentMethod, customerId = null) => {
+  if (!saleItems.length) {
+    setApiStatus('No hay productos en el listado para cobrar', false);
+    return;
+  }
+
+  const payload = {
+    payment_method: paymentMethod,
+    customer_id: customerId,
+    items: saleItems.map((item) => ({
+      barcode: item.barcode,
+      description: item.description,
+      quantity: item.quantity,
+      unit_price: item.unitPrice,
+    })),
+  };
+
+  const result = await fetchJson('/billing/charge', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  const invoiceUrl = `${API_BASE_URL}${result.pdf_url}`;
+  invoiceStatus.innerHTML = `Factura ${result.invoice_number} (CAE ${result.cae}) lista: <a href="${invoiceUrl}" target="_blank" rel="noreferrer">descargar/imprimir PDF</a>`;
+
+  window.open(invoiceUrl, '_blank');
+  setApiStatus(`Cobro registrado y factura ARCA aprobada (${result.invoice_number})`);
+  clearSale();
+};
+
+const goToQuoteScreen = () => {
+  if (!saleItems.length) {
+    setApiStatus('No hay productos para generar presupuesto', false);
+    return;
+  }
+
+  sessionStorage.setItem('pending_quote', JSON.stringify({ items: saleItems }));
+  window.location.href = './quote.html';
+};
+
 const init = async () => {
   try {
     await fetchJson('/health');
@@ -335,40 +375,32 @@ settingsForm.addEventListener('submit', (event) => {
   settingsStatus.textContent = 'Configuración guardada correctamente.';
 });
 
-openCheckout.addEventListener('click', () => {
-  checkoutMenu.classList.toggle('hidden');
-});
-
 payOptions.forEach((button) => {
-  button.addEventListener('click', () => {
-    if (!saleItems.length) {
-      setApiStatus('No hay productos en el listado para cobrar', false);
-      return;
+  button.addEventListener('click', async () => {
+    const method = button.dataset.payMethod;
+    try {
+      await chargeAndInvoice(method);
+    } catch {
+      setApiStatus('No se pudo registrar el cobro/factura', false);
     }
-
-    const label = button.dataset.payMethod === 'cash' ? 'efectivo' : 'tarjeta';
-    setApiStatus(`Cobro registrado con ${label}`);
-    checkoutMenu.classList.add('hidden');
-    clearSale();
   });
 });
 
-payToClientButton.addEventListener('click', () => {
-  if (!saleItems.length) {
-    setApiStatus('No hay productos en el listado para cobrar', false);
-    return;
-  }
-
+payToClientButton.addEventListener('click', async () => {
   const clientId = clientIdInput.value.trim();
   if (!clientId) {
     setApiStatus('Ingresá un ID de cliente para sumar a cuenta corriente', false);
     return;
   }
 
-  setApiStatus(`Venta sumada al cliente ${clientId}`);
-  clientIdInput.value = '';
-  checkoutMenu.classList.add('hidden');
-  clearSale();
+  try {
+    await chargeAndInvoice('customer_account', clientId);
+    clientIdInput.value = '';
+  } catch {
+    setApiStatus('No se pudo cargar a cuenta corriente/facturar', false);
+  }
 });
+
+generateQuoteButton.addEventListener('click', goToQuoteScreen);
 
 init();

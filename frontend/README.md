@@ -7,7 +7,9 @@ Interfaz base para mostrador con foco en:
 - Navegar por módulos: POS, Clientes, Productos y Configuración.
 - Agregar/modificar productos desde UI.
 - Configurar opciones de login/multiusuario (guardado local en navegador).
-- Armar listado de venta, ver total final en margen inferior derecho y abrir submenú de cobro (efectivo, tarjeta o sumar a cliente).
+- Armar listado de venta y ver total final en margen inferior derecho.
+- Cobrar directo por método (`efectivo`, `tarjeta`, `cuenta corriente`) emitiendo factura (simulación ARCA) y obtener PDF para descargar/imprimir.
+- Opción de `Presupuesto` que redirige a pantalla imprimible.
 
 ## Ejecutar
 Con backend en `http://127.0.0.1:8000`:

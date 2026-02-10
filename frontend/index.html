@@ -38,10 +38,7 @@
           </div>
           <div>
             <label for="search-name">Buscar por nombre / palabra clave</label>
-            <input
-              id="search-name"
-              placeholder="Ej: arbol de levas o %arb para coincidencia parcial"
-            />
+            <input id="search-name" placeholder="Ej: arbol de levas o %arb para coincidencia parcial" />
           </div>
           <button id="clear-search" class="secondary" type="button">Limpiar búsqueda</button>
         </div>
@@ -91,12 +88,10 @@
       <section class="panel module hidden" data-module-panel="clientes">
         <h2>Módulo clientes</h2>
         <p>Acceso rápido al módulo de clientes/cuenta corriente (MVP visual).</p>
-        <p class="muted">Próximo paso: alta, edición y movimientos desde esta vista.</p>
       </section>
 
       <section class="panel module hidden" data-module-panel="productos">
         <h2>Gestión de productos</h2>
-
         <form id="add-product-form" class="form-block">
           <h3>Agregar producto</h3>
           <div class="form-grid">
@@ -131,14 +126,8 @@
       <section class="panel module hidden" data-module-panel="configuracion">
         <h2>Configuración de usuarios/login</h2>
         <form id="settings-form" class="form-block">
-          <label class="checkbox-row">
-            <input type="checkbox" id="multi-user-enabled" />
-            Habilitar más de un usuario
-          </label>
-          <label class="checkbox-row">
-            <input type="checkbox" id="login-required" checked />
-            Requerir login al iniciar el sistema
-          </label>
+          <label class="checkbox-row"><input type="checkbox" id="multi-user-enabled" />Habilitar más de un usuario</label>
+          <label class="checkbox-row"><input type="checkbox" id="login-required" checked />Requerir login al iniciar el sistema</label>
           <button type="submit">Guardar configuración</button>
         </form>
         <p id="settings-status" class="muted">Configuración no guardada aún.</p>
@@ -148,18 +137,19 @@
     <aside class="checkout-dock" data-module-panel="pos">
       <p class="checkout-label">Total final</p>
       <p id="checkout-total" class="checkout-total">$ 0</p>
-      <button id="open-checkout" type="button">Cobrar</button>
 
-      <div id="checkout-menu" class="checkout-menu hidden">
-        <p class="checkout-subtitle">Elegí método de pago</p>
-        <button class="pay-option" data-pay-method="cash" type="button">Pagar en efectivo</button>
-        <button class="pay-option" data-pay-method="card" type="button">Pagar con tarjeta</button>
-
+      <div class="checkout-menu">
+        <p class="checkout-subtitle">Método de pago / acción</p>
+        <button class="pay-option" data-pay-method="cash" type="button">Cobrar efectivo + Facturar ARCA</button>
+        <button class="pay-option" data-pay-method="card" type="button">Cobrar tarjeta + Facturar ARCA</button>
         <div class="pay-client-row">
           <input id="client-id-input" placeholder="ID cliente (cuenta corriente)" />
-          <button id="pay-to-client" class="secondary" type="button">Sumar a cliente</button>
+          <button id="pay-to-client" class="secondary" type="button">Sumar a cliente + Facturar ARCA</button>
         </div>
+        <button id="generate-quote" class="secondary" type="button">Presupuesto (imprimir)</button>
       </div>
+
+      <p id="invoice-status" class="muted checkout-info">Todavía no hay factura emitida.</p>
     </aside>
 
     <script src="./app.js" type="module"></script>
