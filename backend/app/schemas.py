@@ -38,3 +38,32 @@ class AccountMovement(BaseModel):
 
 class PriceListSwitch(BaseModel):
     active_list: str = Field(description="card o cash")
+
+
+class StockMovement(BaseModel):
+    barcode: str
+    quantity: int = Field(gt=0)
+    kind: str = Field(description="purchase, adjustment_in, adjustment_out o sale")
+    note: str | None = None
+
+
+class ChargeItem(BaseModel):
+    barcode: str
+    description: str
+    quantity: int = Field(gt=0)
+    unit_price: float = Field(ge=0)
+
+
+class ChargeRequest(BaseModel):
+    payment_method: str = Field(description="cash, card o customer_account")
+    items: list[ChargeItem]
+    customer_id: str | None = None
+
+
+class ChargeResponse(BaseModel):
+    invoice_id: str
+    invoice_number: str
+    cae: str
+    total: float
+    pdf_url: str
+    arca_status: str
