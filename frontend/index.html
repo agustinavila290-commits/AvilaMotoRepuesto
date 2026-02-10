@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avila Moto Repuesto | POS Front</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <div>
+          <h1>POS · Avila Moto Repuesto</h1>
+          <p>Un solo listado de ventas con búsqueda, cantidades, subtotal y cobro/factura.</p>
+        </div>
+        <div class="status" id="api-status">Verificando API…</div>
+      </header>
+
+      <nav class="top-nav">
+        <button class="nav-btn active" data-module="pos" type="button">POS</button>
+        <button class="nav-btn" data-module="clientes" type="button">Clientes</button>
+        <button class="nav-btn" data-module="productos" type="button">Productos</button>
+        <button class="nav-btn" data-module="configuracion" type="button">Configuración</button>
+      </nav>
+
+      <section class="toolbar module" data-module-panel="pos">
+        <button id="toggle-price-list" type="button">Cambiar a contado</button>
+        <span id="active-list-label">Lista activa: tarjeta</span>
+        <button id="reload-products" type="button" class="secondary">Recargar productos</button>
+      </section>
+
+      <section class="panel module" data-module-panel="pos">
+        <h2>Búsqueda rápida</h2>
+        <div class="search-grid">
+          <div>
+            <label for="search-barcode">Buscar por código de barras</label>
+            <input id="search-barcode" placeholder="Ej: 7791234567890" />
+          </div>
+          <div>
+            <label for="search-name">Buscar por nombre / palabra clave</label>
+            <input id="search-name" placeholder="Ej: arbol de levas o %arb para coincidencia parcial" />
+          </div>
+          <button id="clear-search" class="secondary" type="button">Limpiar búsqueda</button>
+        </div>
+      </section>
+
+      <section class="panel module" data-module-panel="pos">
+        <h2>Listado de ventas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Marca</th>
+              <th id="price-column-title">Precio tarjeta</th>
+              <th>Stock</th>
+              <th>Cant.</th>
+              <th>Subtotal</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="products-body">
+            <tr>
+              <td colspan="8" class="empty">Cargando productos…</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel module hidden" data-module-panel="clientes">
+        <h2>Módulo clientes</h2>
+        <p>Acceso rápido al módulo de clientes/cuenta corriente (MVP visual).</p>
+      </section>
+
+      <section class="panel module hidden" data-module-panel="productos">
+        <h2>Gestión de productos</h2>
+        <form id="add-product-form" class="form-block">
+          <h3>Agregar producto</h3>
+          <div class="form-grid">
+            <input name="barcode" placeholder="Código de barras" required />
+            <input name="description" placeholder="Descripción" required />
+            <input name="brand" placeholder="Marca" required />
+            <input name="supplier" placeholder="Proveedor" required />
+            <input name="cost_price" type="number" min="0" placeholder="Costo" required />
+            <input name="cash_price" type="number" min="0" placeholder="Precio contado" required />
+            <input name="card_price" type="number" min="0" placeholder="Precio tarjeta" required />
+            <input name="stock" type="number" min="0" placeholder="Stock" required />
+          </div>
+          <button type="submit">Guardar producto</button>
+        </form>
+
+        <form id="edit-product-form" class="form-block">
+          <h3>Modificar producto</h3>
+          <div class="form-grid">
+            <input name="barcode" placeholder="Código de barras existente" required />
+            <input name="description" placeholder="Nueva descripción" required />
+            <input name="brand" placeholder="Nueva marca" required />
+            <input name="supplier" placeholder="Nuevo proveedor" required />
+            <input name="cost_price" type="number" min="0" placeholder="Nuevo costo" required />
+            <input name="cash_price" type="number" min="0" placeholder="Nuevo precio contado" required />
+            <input name="card_price" type="number" min="0" placeholder="Nuevo precio tarjeta" required />
+            <input name="stock" type="number" min="0" placeholder="Nuevo stock" required />
+          </div>
+          <button type="submit">Actualizar producto</button>
+        </form>
+      </section>
+
+      <section class="panel module hidden" data-module-panel="configuracion">
+        <h2>Configuración de usuarios/login</h2>
+        <form id="settings-form" class="form-block">
+          <label class="checkbox-row"><input type="checkbox" id="multi-user-enabled" />Habilitar más de un usuario</label>
+          <label class="checkbox-row"><input type="checkbox" id="login-required" checked />Requerir login al iniciar el sistema</label>
+          <button type="submit">Guardar configuración</button>
+        </form>
+        <p id="settings-status" class="muted">Configuración no guardada aún.</p>
+      </section>
+    </main>
+
+    <aside class="checkout-dock" data-module-panel="pos">
+      <p class="checkout-label">Total final</p>
+      <p id="checkout-total" class="checkout-total">$ 0</p>
+
+      <div class="checkout-menu">
+        <p class="checkout-subtitle">Método de pago / acción</p>
+        <button class="pay-option" data-pay-method="cash" type="button">Cobrar efectivo + Facturar ARCA</button>
+        <button class="pay-option" data-pay-method="card" type="button">Cobrar tarjeta + Facturar ARCA</button>
+        <div class="pay-client-row">
+          <input id="client-id-input" placeholder="ID cliente (cuenta corriente)" />
+          <button id="pay-to-client" class="secondary" type="button">Sumar a cliente + Facturar ARCA</button>
+        </div>
+        <button id="generate-quote" class="secondary" type="button">Presupuesto (imprimir)</button>
+      </div>
+
+      <p id="invoice-status" class="muted checkout-info">Todavía no hay factura emitida.</p>
+    </aside>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
