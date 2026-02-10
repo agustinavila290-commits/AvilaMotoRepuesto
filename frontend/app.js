@@ -5,7 +5,6 @@ const toggleButton = document.querySelector('#toggle-price-list');
 const activeListLabel = document.querySelector('#active-list-label');
 const priceColumnTitle = document.querySelector('#price-column-title');
 const productsBody = document.querySelector('#products-body');
-const saleItemsBody = document.querySelector('#sale-items-body');
 const reloadButton = document.querySelector('#reload-products');
 const navButtons = document.querySelectorAll('.nav-btn');
 const modulePanels = document.querySelectorAll('.module');
@@ -28,14 +27,10 @@ const invoiceStatus = document.querySelector('#invoice-status');
 
 let activeList = 'card';
 let allProducts = [];
-let saleItems = [];
+const saleQtyByBarcode = new Map();
 
 const formatPrice = (value) =>
-  new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0,
-  }).format(value);
+  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value);
 
 const setApiStatus = (text, ok = true) => {
   apiStatus.textContent = text;
@@ -44,74 +39,88 @@ const setApiStatus = (text, ok = true) => {
 };
 
 const getCurrentPrice = (product) => (activeList === 'card' ? product.card_price : product.cash_price);
+const getQty = (barcode) => saleQtyByBarcode.get(barcode) ?? 0;
+
+const buildSaleItems = () =>
+  allProducts
+    .filter((product) => getQty(product.barcode) > 0)
+    .map((product) => ({
+      barcode: product.barcode,
+      description: product.description,
+      quantity: getQty(product.barcode),
+      unitPrice: getCurrentPrice(product),
+    }));
 
 const updateCheckoutTotal = () => {
-  const total = saleItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const total = buildSaleItems().reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   checkoutTotal.textContent = formatPrice(total);
 };
 
-const renderSaleItems = () => {
-  if (!saleItems.length) {
-    saleItemsBody.innerHTML =
-      '<tr><td colspan="5" class="empty">Todavía no agregaste productos al listado.</td></tr>';
+const setModule = (moduleName) => {
+  navButtons.forEach((button) => button.classList.toggle('active', button.dataset.module === moduleName));
+  modulePanels.forEach((panel) => panel.classList.toggle('hidden', panel.dataset.modulePanel !== moduleName));
+  checkoutDock.classList.toggle('hidden', moduleName !== 'pos');
+};
+
+const addQty = (barcode) => {
+  const product = allProducts.find((p) => p.barcode === barcode);
+  if (!product) return;
+  const next = getQty(barcode) + 1;
+  if (next > product.stock) {
+    setApiStatus('No podés superar el stock disponible', false);
+    return;
+  }
+  saleQtyByBarcode.set(barcode, next);
+  applyFilters();
+  setApiStatus(`Agregado: ${product.description}`);
+};
+
+const removeQty = (barcode) => {
+  const current = getQty(barcode);
+  if (current <= 0) return;
+  if (current === 1) saleQtyByBarcode.delete(barcode);
+  else saleQtyByBarcode.set(barcode, current - 1);
+  applyFilters();
+};
+
+const renderProducts = (products) => {
+  if (!products.length) {
+    productsBody.innerHTML = '<tr><td colspan="8" class="empty">No hay productos para los filtros aplicados.</td></tr>';
     updateCheckoutTotal();
     return;
   }
 
-  saleItemsBody.innerHTML = saleItems
-    .map(
-      (item) => `
+  productsBody.innerHTML = products
+    .map((product) => {
+      const visiblePrice = getCurrentPrice(product);
+      const qty = getQty(product.barcode);
+      const subtotal = qty * visiblePrice;
+      return `
         <tr>
-          <td>${item.barcode}</td>
-          <td>${item.description}</td>
-          <td>${item.quantity}</td>
-          <td>${formatPrice(item.unitPrice)}</td>
-          <td>${formatPrice(item.quantity * item.unitPrice)}</td>
+          <td>${product.barcode}</td>
+          <td>${product.description}</td>
+          <td>${product.brand}</td>
+          <td>${formatPrice(visiblePrice)}</td>
+          <td>${product.stock}</td>
+          <td>${qty}</td>
+          <td>${formatPrice(subtotal)}</td>
+          <td>
+            <button class="qty-btn" data-action="minus" data-barcode="${product.barcode}" type="button">-</button>
+            <button class="qty-btn" data-action="plus" data-barcode="${product.barcode}" type="button">+</button>
+          </td>
         </tr>
-      `,
-    )
+      `;
+    })
     .join('');
 
-  updateCheckoutTotal();
-};
-
-const addProductToSale = (barcode) => {
-  const product = allProducts.find((entry) => entry.barcode === barcode);
-  if (!product) {
-    setApiStatus('No se encontró el producto seleccionado', false);
-    return;
-  }
-
-  const unitPrice = getCurrentPrice(product);
-  const existing = saleItems.find((item) => item.barcode === barcode);
-
-  if (existing) {
-    existing.quantity += 1;
-    existing.unitPrice = unitPrice;
-  } else {
-    saleItems.push({
-      barcode: product.barcode,
-      description: product.description,
-      quantity: 1,
-      unitPrice,
+  document.querySelectorAll('.qty-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (button.dataset.action === 'plus') addQty(button.dataset.barcode);
+      else removeQty(button.dataset.barcode);
     });
-  }
-
-  renderSaleItems();
-  setApiStatus(`Agregado al listado: ${product.description}`);
-};
-
-const setModule = (moduleName) => {
-  navButtons.forEach((button) => {
-    button.classList.toggle('active', button.dataset.module === moduleName);
   });
 
-  modulePanels.forEach((panel) => {
-    panel.classList.toggle('hidden', panel.dataset.modulePanel !== moduleName);
-  });
-
-  const isPos = moduleName === 'pos';
-  checkoutDock.classList.toggle('hidden', !isPos);
+  updateCheckoutTotal();
 };
 
 const applyFilters = () => {
@@ -120,47 +129,12 @@ const applyFilters = () => {
 
   const filtered = allProducts.filter((product) => {
     const barcodeOk = !barcode || product.barcode.toLowerCase().includes(barcode);
-
-    if (!rawName) {
-      return barcodeOk;
-    }
-
-    const description = product.description.toLowerCase();
+    if (!rawName) return barcodeOk;
     const term = rawName.startsWith('%') ? rawName.slice(1) : rawName;
-    const nameOk = description.includes(term);
-
-    return barcodeOk && nameOk;
+    return barcodeOk && product.description.toLowerCase().includes(term);
   });
 
   renderProducts(filtered);
-};
-
-const renderProducts = (products) => {
-  if (!products.length) {
-    productsBody.innerHTML =
-      '<tr><td colspan="6" class="empty">No hay productos para los filtros aplicados.</td></tr>';
-    return;
-  }
-
-  productsBody.innerHTML = products
-    .map((product) => {
-      const visiblePrice = getCurrentPrice(product);
-      return `
-        <tr>
-          <td>${product.barcode}</td>
-          <td>${product.description}</td>
-          <td>${product.brand}</td>
-          <td>${formatPrice(visiblePrice)}</td>
-          <td>${product.stock}</td>
-          <td><button class="add-to-sale" data-barcode="${product.barcode}" type="button">Agregar</button></td>
-        </tr>
-      `;
-    })
-    .join('');
-
-  document.querySelectorAll('.add-to-sale').forEach((button) => {
-    button.addEventListener('click', () => addProductToSale(button.dataset.barcode));
-  });
 };
 
 const syncPriceLabels = () => {
@@ -168,15 +142,7 @@ const syncPriceLabels = () => {
   activeListLabel.textContent = `Lista activa: ${isCard ? 'tarjeta' : 'contado'}`;
   priceColumnTitle.textContent = `Precio ${isCard ? 'tarjeta' : 'contado'}`;
   toggleButton.textContent = `Cambiar a ${isCard ? 'contado' : 'tarjeta'}`;
-
-  saleItems = saleItems.map((item) => {
-    const product = allProducts.find((entry) => entry.barcode === item.barcode);
-    if (!product) {
-      return item;
-    }
-    return { ...item, unitPrice: getCurrentPrice(product) };
-  });
-  renderSaleItems();
+  applyFilters();
 };
 
 const fetchJson = async (path, options = undefined) => {
@@ -184,19 +150,13 @@ const fetchJson = async (path, options = undefined) => {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
-
-  if (!response.ok) {
-    throw new Error(`Error ${response.status}: ${await response.text()}`);
-  }
-
+  if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
   return response.json();
 };
 
 const loadProducts = async () => {
-  const products = await fetchJson('/products');
-  allProducts = products;
+  allProducts = await fetchJson('/products');
   applyFilters();
-  syncPriceLabels();
 };
 
 const loadActivePriceList = async () => {
@@ -207,13 +167,9 @@ const loadActivePriceList = async () => {
 
 const switchPriceList = async () => {
   const next = activeList === 'card' ? 'cash' : 'card';
-  await fetchJson('/pricing/active', {
-    method: 'POST',
-    body: JSON.stringify({ active_list: next }),
-  });
+  await fetchJson('/pricing/active', { method: 'POST', body: JSON.stringify({ active_list: next }) });
   activeList = next;
   syncPriceLabels();
-  applyFilters();
 };
 
 const handleSaveProduct = async (form, mode) => {
@@ -228,12 +184,7 @@ const handleSaveProduct = async (form, mode) => {
     card_price: Number(formData.get('card_price')),
     stock: Number(formData.get('stock')),
   };
-
-  await fetchJson('/products', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-
+  await fetchJson('/products', { method: 'POST', body: JSON.stringify(payload) });
   await loadProducts();
   form.reset();
   setApiStatus(`Producto ${mode === 'add' ? 'agregado' : 'actualizado'} correctamente`);
@@ -241,10 +192,7 @@ const handleSaveProduct = async (form, mode) => {
 
 const loadSettings = () => {
   const saved = localStorage.getItem('pos_settings');
-  if (!saved) {
-    return;
-  }
-
+  if (!saved) return;
   try {
     const settings = JSON.parse(saved);
     multiUserInput.checked = Boolean(settings.multiUserEnabled);
@@ -256,47 +204,45 @@ const loadSettings = () => {
 };
 
 const clearSale = () => {
-  saleItems = [];
-  renderSaleItems();
+  saleQtyByBarcode.clear();
+  applyFilters();
 };
 
 const chargeAndInvoice = async (paymentMethod, customerId = null) => {
-  if (!saleItems.length) {
+  const items = buildSaleItems();
+  if (!items.length) {
     setApiStatus('No hay productos en el listado para cobrar', false);
     return;
   }
 
-  const payload = {
-    payment_method: paymentMethod,
-    customer_id: customerId,
-    items: saleItems.map((item) => ({
-      barcode: item.barcode,
-      description: item.description,
-      quantity: item.quantity,
-      unit_price: item.unitPrice,
-    })),
-  };
-
   const result = await fetchJson('/billing/charge', {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      payment_method: paymentMethod,
+      customer_id: customerId,
+      items: items.map((it) => ({
+        barcode: it.barcode,
+        description: it.description,
+        quantity: it.quantity,
+        unit_price: it.unitPrice,
+      })),
+    }),
   });
 
   const invoiceUrl = `${API_BASE_URL}${result.pdf_url}`;
   invoiceStatus.innerHTML = `Factura ${result.invoice_number} (CAE ${result.cae}) lista: <a href="${invoiceUrl}" target="_blank" rel="noreferrer">descargar/imprimir PDF</a>`;
-
   window.open(invoiceUrl, '_blank');
   setApiStatus(`Cobro registrado y factura ARCA aprobada (${result.invoice_number})`);
   clearSale();
 };
 
 const goToQuoteScreen = () => {
-  if (!saleItems.length) {
+  const items = buildSaleItems();
+  if (!items.length) {
     setApiStatus('No hay productos para generar presupuesto', false);
     return;
   }
-
-  sessionStorage.setItem('pending_quote', JSON.stringify({ items: saleItems }));
+  sessionStorage.setItem('pending_quote', JSON.stringify({ items }));
   window.location.href = './quote.html';
 };
 
@@ -308,22 +254,15 @@ const init = async () => {
     await loadProducts();
   } catch {
     setApiStatus('No se pudo conectar con la API', false);
-    productsBody.innerHTML =
-      '<tr><td colspan="6" class="empty">Iniciá el backend para ver datos de productos.</td></tr>';
+    productsBody.innerHTML = '<tr><td colspan="8" class="empty">Iniciá el backend para ver datos.</td></tr>';
   }
-
-  renderSaleItems();
   loadSettings();
   setModule('pos');
 };
 
-navButtons.forEach((button) => {
-  button.addEventListener('click', () => setModule(button.dataset.module));
-});
-
+navButtons.forEach((button) => button.addEventListener('click', () => setModule(button.dataset.module)));
 searchBarcodeInput.addEventListener('input', applyFilters);
 searchNameInput.addEventListener('input', applyFilters);
-
 clearSearchButton.addEventListener('click', () => {
   searchBarcodeInput.value = '';
   searchNameInput.value = '';
@@ -367,19 +306,17 @@ editProductForm.addEventListener('submit', async (event) => {
 
 settingsForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const payload = {
-    multiUserEnabled: multiUserInput.checked,
-    loginRequired: loginRequiredInput.checked,
-  };
-  localStorage.setItem('pos_settings', JSON.stringify(payload));
+  localStorage.setItem(
+    'pos_settings',
+    JSON.stringify({ multiUserEnabled: multiUserInput.checked, loginRequired: loginRequiredInput.checked }),
+  );
   settingsStatus.textContent = 'Configuración guardada correctamente.';
 });
 
 payOptions.forEach((button) => {
   button.addEventListener('click', async () => {
-    const method = button.dataset.payMethod;
     try {
-      await chargeAndInvoice(method);
+      await chargeAndInvoice(button.dataset.payMethod);
     } catch {
       setApiStatus('No se pudo registrar el cobro/factura', false);
     }
@@ -392,7 +329,6 @@ payToClientButton.addEventListener('click', async () => {
     setApiStatus('Ingresá un ID de cliente para sumar a cuenta corriente', false);
     return;
   }
-
   try {
     await chargeAndInvoice('customer_account', clientId);
     clientIdInput.value = '';

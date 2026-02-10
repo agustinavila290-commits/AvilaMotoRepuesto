@@ -11,7 +11,7 @@
       <header class="header">
         <div>
           <h1>POS · Avila Moto Repuesto</h1>
-          <p>Vista de mostrador con búsqueda, módulos y alternancia de lista de precios.</p>
+          <p>Un solo listado de ventas con búsqueda, cantidades, subtotal y cobro/factura.</p>
         </div>
         <div class="status" id="api-status">Verificando API…</div>
       </header>
@@ -45,7 +45,7 @@
       </section>
 
       <section class="panel module" data-module-panel="pos">
-        <h2>Productos</h2>
+        <h2>Listado de ventas</h2>
         <table>
           <thead>
             <tr>
@@ -54,32 +54,14 @@
               <th>Marca</th>
               <th id="price-column-title">Precio tarjeta</th>
               <th>Stock</th>
+              <th>Cant.</th>
+              <th>Subtotal</th>
               <th>Acción</th>
             </tr>
           </thead>
           <tbody id="products-body">
             <tr>
-              <td colspan="6" class="empty">Cargando productos…</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="panel module" data-module-panel="pos">
-        <h2>Listado de venta</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Precio unitario</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody id="sale-items-body">
-            <tr>
-              <td colspan="5" class="empty">Todavía no agregaste productos al listado.</td>
+              <td colspan="8" class="empty">Cargando productos…</td>
             </tr>
           </tbody>
         </table>

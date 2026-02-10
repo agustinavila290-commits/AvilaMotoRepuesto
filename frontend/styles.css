@@ -247,3 +247,9 @@ label {
 .quote-actions a {
   text-decoration: none;
 }
+
+
+.qty-btn {
+  padding: 0.35rem 0.55rem;
+  margin-right: 0.3rem;
+}
